@@ -209,6 +209,7 @@ class chbtcApi:
         LC = kline[4]
         LL = kline[3]
         R = max(HH - LC, HC - LL)
+        R = max(R, 0.06)
         end = kline[4]
         upline = end + self.k1 * R
         downline = end - self.k2 * R
