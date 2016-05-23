@@ -218,15 +218,17 @@ class chbtcApi:
         if d:
             # print d
             lastPrice = float(d['ticker']['last'])
+            buyPrice = float(d['ticker']['buy'])
+            sellPrice = float(d['ticker']['sell'])
             print 'last: %f, up: %f, down: %f' % (lastPrice, upline, downline)
-            if lastPrice > upline:
+            if lastPrice > upline and buyPrice > upline:
                 if self.eth < 0.1:
                     self.buyHandledCny(lastPrice)
                     self.syncBalance()
                     logging.info('bought 1111 eth: %f' % self.eth)
                     return
 
-            if lastPrice < downline:
+            if lastPrice < downline and sellPrice < downline:
                 if self.eth > 0.1:
                     eth = self.eth
                     self.sellAll(lastPrice)
