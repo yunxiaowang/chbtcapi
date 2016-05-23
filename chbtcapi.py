@@ -30,7 +30,7 @@ class chbtcApi:
         self.eth = 0.0
 
         self.syncBalanceIndex = 0
-        self.last5mink = None
+        self.lastPeriodK = None
 
     def _setupLogging(self):
         logging.basicConfig(
@@ -132,8 +132,8 @@ class chbtcApi:
         self.cny = balance['CNY']['amount']
         self.eth = balance['ETH']['amount']
 
-    def get5mink(self):
-        data = 'needTickers=1&symbol=chbtcethcny&type=5min&since=%d' % (int(time.time()) * 1000)
+    def getKline(self):
+        data = 'needTickers=1&symbol=chbtcethcny&type=1hour&since=%d' % (int(time.time()) * 1000)
 
         req = urllib2.Request('https://trans.chbtc.com/markets/klineData')
         req.add_header('Accept', 'application/json, text/javascript, */*; q=0.01')
@@ -149,9 +149,9 @@ class chbtcApi:
         response = urllib2.urlopen(req, data=data)
         d = json.loads(response.read())
         kdata = d['datas']['data']
-        self.last5mink = kdata[-1]
-        print kdata[-1]
-        return kdata[-1]
+        self.lastPeriodK = kdata[-2]
+        print kdata[-2]
+        return kdata[-2]
 
     def buy(self, price, volume):
         try:
@@ -202,7 +202,7 @@ class chbtcApi:
             return None
 
     def check(self):
-        kline = self.last5mink
+        kline = self.lastPeriodK
         # print 'kline: ', kline
         HH = kline[2]
         HC = kline[4]
@@ -219,7 +219,7 @@ class chbtcApi:
             # print d
             lastPrice = float(d['ticker']['last'])
             buyPrice = float(d['ticker']['buy'])
-            sellPrice = float(d['ticker']['sell'])
+            # sellPrice = float(d['ticker']['sell'])
             print 'last: %f, up: %f, down: %f' % (lastPrice, upline, downline)
             if lastPrice > upline and buyPrice > upline:
                 if self.eth < 0.1:
@@ -228,7 +228,8 @@ class chbtcApi:
                     logging.info('bought 1111 eth: %f' % self.eth)
                     return
 
-            if lastPrice < downline and sellPrice < downline:
+            # if lastPrice < downline and sellPrice < downline:
+            if lastPrice < downline:
                 if self.eth > 0.1:
                     eth = self.eth
                     self.sellAll(lastPrice)
@@ -242,7 +243,7 @@ class chbtcApi:
             try:
                 if self.syncBalanceIndex == 0:
                     self.syncBalance()
-                    self.get5mink()
+                    self.getKline()
                 self.syncBalanceIndex = (self.syncBalanceIndex + 1) % 8
                 self.check()
 
