@@ -31,6 +31,12 @@ class chbtcApi:
 
         self.syncBalanceIndex = 0
         self.lastPeriodK = None
+        self.lastN1PeriodK = None
+        self.lastN2PeriodK = None
+
+        self.increase3 = 0.0
+        self.increase2 = 0.0
+        self.increase1 = 0.0
 
     def _setupLogging(self):
         logging.basicConfig(
@@ -150,6 +156,13 @@ class chbtcApi:
         d = json.loads(response.read())
         kdata = d['datas']['data']
         self.lastPeriodK = kdata[-2]
+        self.lastN1PeriodK = kdata[-3]
+        self.lastN2PeriodK = kdata[-4]
+
+        self.increase3 = (kdata[-2][4] - kdata[-4][1]) * 1.0 / kdata[-4][1]
+        self.increase2 = (kdata[-2][4] - kdata[-3][1]) * 1.0 / kdata[-3][1]
+        self.increase1 = (kdata[-2][4] - kdata[-2][1]) * 1.0 / kdata[-2][1]
+
         print kdata[-2]
         return kdata[-2]
 
@@ -209,7 +222,7 @@ class chbtcApi:
         LC = kline[4]
         LL = kline[3]
         R = max(HH - LC, HC - LL)
-        R = max(R, 0.06)
+        R = max(R, 0.10)
         end = kline[4]
         upline = end + self.k1 * R
         downline = end - self.k2 * R
@@ -220,21 +233,29 @@ class chbtcApi:
             lastPrice = float(d['ticker']['last'])
             buyPrice = float(d['ticker']['buy'])
             # sellPrice = float(d['ticker']['sell'])
+
+            print 'last3h: %f%%, last2h: %f%%, last1h: %f%%' % (self.increase3 * 100, self.increase2 * 100, self.increase1 * 100)
+            if self.increase3 < -0.048 or self.increase2 < -0.035 or self.increase1 < -0.02:
+                if self.eth > 0.1:
+                    self.sellAll(lastPrice)
+                    self.syncBalance()
+                print 'check last321h return'
+                return
+
             print 'last: %f, up: %f, down: %f' % (lastPrice, upline, downline)
+            # if lastPrice < downline and sellPrice < downline:
+            if lastPrice < downline:
+                if self.eth > 0.1:
+                    self.sellAll(lastPrice)
+                    self.syncBalance()
+                    logging.info('selled 0000 eth: %f' % self.eth)
+                    return
+
             if lastPrice > upline and buyPrice > upline:
                 if self.eth < 0.1:
                     self.buyHandledCny(lastPrice)
                     self.syncBalance()
                     logging.info('bought 1111 eth: %f' % self.eth)
-                    return
-
-            # if lastPrice < downline and sellPrice < downline:
-            if lastPrice < downline:
-                if self.eth > 0.1:
-                    eth = self.eth
-                    self.sellAll(lastPrice)
-                    self.syncBalance()
-                    logging.info('selled 0000 eth: %f' % eth)
                     return
 
     def run(self):
