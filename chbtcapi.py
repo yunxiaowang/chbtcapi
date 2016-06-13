@@ -30,6 +30,7 @@ class chbtcApi:
         self.eth = 0.0
 
         self.syncBalanceIndex = 0
+        self.currentPeriodK = None
         self.lastPeriodK = None
         self.lastN1PeriodK = None
         self.lastN2PeriodK = None
@@ -155,6 +156,7 @@ class chbtcApi:
         response = urllib2.urlopen(req, data=data)
         d = json.loads(response.read())
         kdata = d['datas']['data']
+        self.currentPeriodK = kdata[-1]
         self.lastPeriodK = kdata[-2]
         self.lastN1PeriodK = kdata[-3]
         self.lastN2PeriodK = kdata[-4]
@@ -172,7 +174,7 @@ class chbtcApi:
             path = 'order'
 
             obj = self.tradeCall(path, params)
-            #print obj
+            # print obj
             return obj
         except Exception, ex:
             logging.error('chbtc queryAccount exception, %s' % str(ex))
@@ -234,12 +236,19 @@ class chbtcApi:
             buyPrice = float(d['ticker']['buy'])
             # sellPrice = float(d['ticker']['sell'])
 
-            print 'last3h: %f%%, last2h: %f%%, last1h: %f%%' % (self.increase3 * 100, self.increase2 * 100, self.increase1 * 100)
-            if self.increase3 < -0.048 or self.increase2 < -0.035 or self.increase1 < -0.02:
+            # print 'last3h: %f%%, last2h: %f%%, last1h: %f%%' % (self.increase3 * 100, self.increase2 * 100, self.increase1 * 100)
+            # if self.increase3 < -0.048 or self.increase2 < -0.035 or self.increase1 < -0.02:
+            #     if self.eth > 0.1:
+            #         self.sellAll(lastPrice)
+            #         self.syncBalance()
+            #     print 'check last321h return'
+            #     return
+
+            if self.increase1 < 0.0:
                 if self.eth > 0.1:
                     self.sellAll(lastPrice)
                     self.syncBalance()
-                print 'check last321h return'
+                print 'check last 1 h  < 0.0 return'
                 return
 
             print 'last: %f, up: %f, down: %f' % (lastPrice, upline, downline)
@@ -249,14 +258,19 @@ class chbtcApi:
                     self.sellAll(lastPrice)
                     self.syncBalance()
                     logging.info('selled 0000 eth: %f' % self.eth)
-                    return
+                print 'lastPrice < downline return'
+                return
 
-            if lastPrice > upline and buyPrice > upline:
+            # print 'self.currentPeriodK[5]  ', self.currentPeriodK[5]
+            # print 'self.lastPeriodK[5]  ', self.lastPeriodK[5]
+
+            if self.increase1 > 0.001 and lastPrice > upline and buyPrice > upline and self.currentPeriodK[5] > self.lastPeriodK[5]:
                 if self.eth < 0.1:
                     self.buyHandledCny(lastPrice)
                     self.syncBalance()
                     logging.info('bought 1111 eth: %f' % self.eth)
-                    return
+                print 'can buy!!!'
+                return
 
     def run(self):
         logging.info('start!!!')
