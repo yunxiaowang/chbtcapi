@@ -182,7 +182,7 @@ class chbtcApi:
 
     def buyHandledCny(self, price):
         if self.eth < 0.1:
-            cny = self.handledCny
+            cny = min(self.handledCny, self.cny)
             amount = cny / price
             self.buy(price + 2.0, amount)
             logging.info('buy 1111 at: %f' % price)
