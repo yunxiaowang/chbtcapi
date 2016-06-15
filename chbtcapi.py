@@ -164,6 +164,7 @@ class chbtcApi:
         self.increase3 = (kdata[-2][4] - kdata[-5][4]) * 1.0 / kdata[-5][4]
         self.increase2 = (kdata[-2][4] - kdata[-4][4]) * 1.0 / kdata[-4][4]
         self.increase1 = (kdata[-2][4] - kdata[-3][4]) * 1.0 / kdata[-3][4]
+        self.increase0 = (kdata[-1][4] - kdata[-2][4]) * 1.0 / kdata[-2][4]
 
         print kdata[-2]
         return kdata[-2]
@@ -182,7 +183,7 @@ class chbtcApi:
 
     def buyHandledCny(self, price):
         if self.eth < 0.1:
-            cny = self.handledCny
+            cny = min(self.handledCny, self.cny)
             amount = cny / price
             self.buy(price + 2.0, amount)
             logging.info('buy 1111 at: %f' % price)
@@ -244,33 +245,34 @@ class chbtcApi:
             #     print 'check last321h return'
             #     return
 
-            if self.increase1 < 0.0:
+            if self.increase1 < -0.001:
                 if self.eth > 0.1:
                     self.sellAll(lastPrice)
                     self.syncBalance()
-                logging.info('check last 1 h  < 0.0 return')
+                print('%d check last 1 h  < 0.0 return' % int(time.time()))
                 return
 
-            logging.info('last: %f, up: %f, down: %f' % (lastPrice, upline, downline))
+            print('last: %f, up: %f, down: %f' % (lastPrice, upline, downline))
             # if lastPrice < downline and sellPrice < downline:
             if lastPrice < downline:
                 if self.eth > 0.1:
                     self.sellAll(lastPrice)
                     self.syncBalance()
                     logging.info('selled 0000 eth: %f' % self.eth)
-                logging.info('lastPrice < downline return')
+                # logging.info('lastPrice < downline return')
                 return
 
             # print 'self.currentPeriodK[5]  ', self.currentPeriodK[5]
             # print 'self.lastPeriodK[5]  ', self.lastPeriodK[5]
 
             # if self.increase1 > 0.005 and lastPrice > upline and buyPrice > upline and self.currentPeriodK[5] > self.lastPeriodK[5]:
-            if self.increase1 > 0.005 and lastPrice > upline and buyPrice > upline:
+            # print('self.increase0: %f' % self.increase0)
+            if (self.increase1 > 0.005 and lastPrice > upline and buyPrice > upline) or (self.increase1 > 0.01 and self.increase0 > 0.007):
                 if self.eth < 0.1:
                     self.buyHandledCny(lastPrice)
                     self.syncBalance()
                     logging.info('bought 1111 eth: %f' % self.eth)
-                logging.info('can buy!!!')
+                print('can buy!!!')
                 return
 
     def run(self):
