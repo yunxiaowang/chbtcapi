@@ -254,13 +254,14 @@ class chbtcApi:
                 # print('%d check last 1 h  < 0.0 return' % int(time.time()))
                 return
 
-            # print('last: %f, up: %f, down: %f' % (lastPrice, upline, downline))
-            # if lastPrice < downline and sellPrice < downline:
-            if lastPrice < downline:
+            if self.syncBalanceIndex == 0:
+                print('last: %f, up: %f, down: %f' % (lastPrice, upline, downline))
+            if lastPrice < downline and sellPrice < downline:
+            # if lastPrice < downline:
                 if self.eth > 0.1:
                     self.sellAll(lastPrice)
                     self.syncBalance()
-                    # logging.info('selled 0000 eth: %f' % self.eth)
+                    logging.info('selled 0000 eth: %f' % self.eth)
                 # logging.info('lastPrice < downline return')
                 return
 
@@ -271,9 +272,10 @@ class chbtcApi:
             # print('self.increase0: %f' % self.increase0)
             if (self.increase1 > 0.005 and lastPrice > upline and buyPrice > upline) or (self.increase1 > 0.01 and self.increase0 > 0.007):
                 if self.eth < 0.1:
+                    logging.info('last: %f, up: %f, down: %f' % (lastPrice, upline, downline))
                     self.buyHandledCny(lastPrice)
                     self.syncBalance()
-                    # logging.info('bought 1111 eth: %f' % self.eth)
+                    logging.info('bought 1111 eth: %f' % self.eth)
                 # print('can buy!!!')
                 return
 
