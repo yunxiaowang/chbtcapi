@@ -239,7 +239,6 @@ class chbtcApi:
             buyPrice = float(d['ticker']['buy'])
             sellPrice = float(d['ticker']['sell'])
 
-            # print 'last3h: %f%%, last2h: %f%%, last1h: %f%%' % (self.increase3 * 100, self.increase2 * 100, self.increase1 * 100)
             # if self.increase3 < -0.048 or self.increase2 < -0.035 or self.increase1 < -0.02:
             #     if self.eth > 0.1:
             #         self.sellAll(lastPrice)
@@ -247,19 +246,22 @@ class chbtcApi:
             #     print 'check last321h return'
             #     return
 
+            if self.syncBalanceIndex == 0:
+                print('last: %f, up: %f, down: %f' % (lastPrice, upline, downline))
+
             fallrate = (sellPrice - kline[4]) / kline[4]
             # print('sellPrice ', sellPrice)
             # print('kline[4] ', kline[4])
-            # print('fallrate::::: ', fallrate)
-            if self.increase1 < -0.001 or fallrate < -0.02:
+            # if self.increase1 < -0.001 or fallrate < -0.02:
+            print 'last3h: %f%%, last2h: %f%%, last1h: %f%%' % (self.increase3 * 100, self.increase2 * 100, self.increase1 * 100)
+            print('fallrate::::: ', fallrate)
+            if self.increase3 < -0.048 or self.increase2 < -0.035 or self.increase1 < -0.02 or fallrate < -0.02:
                 if self.eth > 0.1:
                     self.sellAll(lastPrice)
                     self.syncBalance()
                 # print('%d check last 1 h  < 0.0 return' % int(time.time()))
                 return
 
-            if self.syncBalanceIndex == 0:
-                print('last: %f, up: %f, down: %f' % (lastPrice, upline, downline))
             if lastPrice < downline and sellPrice < downline:
                 # if lastPrice < downline:
                 if self.eth > 0.1:
