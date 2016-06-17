@@ -177,7 +177,7 @@ class chbtcApi:
             path = 'order'
 
             obj = self.tradeCall(path, params)
-            # print obj
+            logging.info('buy result: %s' % str(obj))
             return obj
         except Exception, ex:
             logging.error('chbtc queryAccount exception, %s' % str(ex))
@@ -196,7 +196,7 @@ class chbtcApi:
             path = 'order'
 
             obj = self.tradeCall(path, params)
-            #print obj
+            logging.info('sell result: %s' % str(obj))
             return obj
         except Exception, ex:
             logging.error('chbtc queryAccount exception, %s' % str(ex))
