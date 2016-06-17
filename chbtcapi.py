@@ -186,7 +186,7 @@ class chbtcApi:
     def buyHandledCny(self, price):
         if self.eth < 0.1:
             cny = min(self.handledCny, self.cny)
-            amount = cny / price
+            amount = cny / (price + 2.0)
             self.buy(price + 2.0, amount)
             logging.info('buy 1111 at: %f' % price)
 
@@ -253,8 +253,8 @@ class chbtcApi:
             # print('sellPrice ', sellPrice)
             # print('kline[4] ', kline[4])
             # if self.increase1 < -0.001 or fallrate < -0.02:
-            print 'last3h: %f%%, last2h: %f%%, last1h: %f%%' % (self.increase3 * 100, self.increase2 * 100, self.increase1 * 100)
-            print('fallrate::::: ', fallrate)
+            # print 'last3h: %f%%, last2h: %f%%, last1h: %f%%' % (self.increase3 * 100, self.increase2 * 100, self.increase1 * 100)
+            # print('fallrate::::: ', fallrate)
             if self.increase3 < -0.048 or self.increase2 < -0.035 or self.increase1 < -0.02 or fallrate < -0.02:
                 if self.eth > 0.1:
                     self.sellAll(lastPrice)
